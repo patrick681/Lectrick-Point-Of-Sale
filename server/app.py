@@ -8,7 +8,14 @@ from flask_restful import Resource
 
 # Local imports
 from config import app, db, api
-# Add your model imports
+from routes.product_routes import product_bp
+from routes.sale_routes import sale_bp
+from routes.customer_routes import customer_bp
+
+# Register Blueprints
+app.register_blueprint(product_bp)
+app.register_blueprint(sale_bp)
+app.register_blueprint(customer_bp)
 
 
 # Views go here!
