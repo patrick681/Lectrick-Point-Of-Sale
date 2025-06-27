@@ -1,11 +1,11 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import React from "react";
+
 
 function LoginPage() {
   const navigate = useNavigate();
-
   const initialValues = {
     username: "",
     password: "",
@@ -20,25 +20,28 @@ function LoginPage() {
       .required("Password is required"),
   });
 
-  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
-    try {
-      const res = await fetch("/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
+  try {
+    const res = await fetch("/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
 
-      if (res.ok) {
-        navigate("/");
-      } else {
-        setFieldError("password", "Invalid credentials");
-      }
-    } catch (err) {
-      setFieldError("password", "Server error");
-    } finally {
-      setSubmitting(false);
+    if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem("token", data.access_token); // ✅ store token
+      navigate("/dashboard"); // or wherever you want to go
+    } else {
+      setFieldError("password", "Invalid credentials");
     }
-  };
+  } catch (err) {
+    setFieldError("password", "Server error");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   return (
     <div className="auth-form-wrapper">

@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import api from "../api/axiosInstance"; // make sure axiosInstance is set
 
 function SignUpPage() {
   const navigate = useNavigate();
@@ -26,9 +27,10 @@ function SignUpPage() {
   const checkUsername = async (username) => {
     if (!username) return false;
     try {
-      const res = await fetch(`/api/users/check-username?username=${encodeURIComponent(username)}`);
-      const data = await res.json();
-      return data.available;
+      const res = await api.get(`/api/users/check-username`, {
+        params: { username },
+      });
+      return res.data.available;
     } catch {
       return false;
     }
@@ -43,21 +45,25 @@ function SignUpPage() {
     }
 
     try {
-      const res = await fetch("/api/users/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      // ✅ Register user
+      const res = await api.post("/api/users/register", values);
 
-      if (res.ok) {
+      if (res.status === 201) {
+        // ✅ Immediately log in
+        const loginRes = await api.post("/api/users/login", values);
+        const token = loginRes.data.access_token;
+
+        // ✅ Store JWT token
+        localStorage.setItem("token", token);
+
         setStatus("Registration successful! Redirecting...");
-        setTimeout(() => navigate("/login"), 1500);
+        setTimeout(() => navigate("/"), 1500);
       } else {
-        const data = await res.json();
-        setStatus(data.error || "Registration failed.");
+        setStatus("Registration failed.");
       }
-    } catch {
-      setStatus("Something went wrong. Try again.");
+    } catch (err) {
+      const msg = err.response?.data?.error || "Something went wrong. Try again.";
+      setStatus(msg);
     } finally {
       setSubmitting(false);
     }
@@ -70,7 +76,7 @@ function SignUpPage() {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting, status, touched, values, setFieldTouched, setFieldValue }) => (
+        {({ isSubmitting, status, setFieldError, setFieldTouched }) => (
           <Form className="auth-form">
             <h1>Sign Up</h1>
 
