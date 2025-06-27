@@ -71,7 +71,7 @@ rpds-py==0.25.1
 setuptools==68.2.2
 six==1.16.0
 soupsieve==2.7
-SQLAlchemy==2.0.23
+SQLAlchemy==2.0.30
 SQLAlchemy-serializer==1.4.1
 stack-data==0.6.3
 tinycss2==1.4.0
