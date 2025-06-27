@@ -1,15 +1,36 @@
+"""sale_routes.py
+This module defines routes for handling sales transactions in the application.
+It includes endpoints to retrieve all sales and create a new sale with items.
+"""
 from flask import Blueprint, request, jsonify
-from models import db, Sale, SaleItem, Product, Customer
+from server.models import db, Sale, SaleItem, Product
 
+# Blueprint for sale-related routes
 sale_bp = Blueprint('sale_bp', __name__)
 
 @sale_bp.route('/sales', methods=['GET'])
 def get_sales():
+    """
+    Retrieve all sales from the database.
+    Returns a list of sales, each including its items and customer info.
+    """
     sales = Sale.query.all()
     return jsonify([s.to_dict() for s in sales])
 
 @sale_bp.route('/sales', methods=['POST'])
 def create_sale():
+    """
+    Create a new sale (transaction).
+    Steps:
+    1. Receive customer_id and items (product_id, quantity) from request JSON.
+    2. Validate that each product exists and has enough stock.
+    3. If any product is invalid or stock is insufficient, rollback and return error.
+    4. Create a Sale and related SaleItem records.
+    5. Deduct sold quantity from product stock.
+    6. Calculate and set the total sale amount.
+    7. Commit all changes in a single transaction.
+    8. Return the new sale as JSON.
+    """
     data = request.get_json()
     customer_id = data.get('customer_id')
     items = data.get('items', [])

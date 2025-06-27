@@ -1,14 +1,11 @@
-#!/usr/bin/env python3
-
-# Standard library imports
-from random import randint, choice as rc
-
-# Remote library imports
+"""//seed.py
+This module seeds the database with some test data."""
+from random import randint
 from faker import Faker
 
 # Local imports
 from app import app
-from models import db, Product, Customer, User
+from server.models import db, Product, Customer, User
 
 if __name__ == '__main__':
     fake = Faker()
@@ -41,6 +38,5 @@ if __name__ == '__main__':
         # Seed Users (for authentication)
         user = User(username='admin', password_hash='admin')
         db.session.add(user)
-
         db.session.commit()
         print("Seeding complete!")
